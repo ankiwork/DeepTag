@@ -20,8 +20,6 @@ class MainWindow(QMainWindow):
     def __init__(self) -> None:
         """Инициализирует главное окно с настройками по умолчанию."""
         super().__init__()
-
-        # Настройки окна
         self._setup_window()
         self._init_ui()
 
@@ -34,8 +32,5 @@ class MainWindow(QMainWindow):
     def _init_ui(self) -> None:
         """Инициализирует пользовательский интерфейс."""
         tab_widget = QTabWidget()
-
-        # Добавление вкладок
         _setup_tabs(tab_widget)
-
         self.setCentralWidget(tab_widget)
