@@ -9,16 +9,14 @@ from project.app.utils.logger import setup_logger
 class ProjectsTab(QWidget):
     """Вкладка для управления проектами с сохранением в JSON."""
 
+    # Добавляем атрибуты класса
+    data_file = Path(__file__).parent.parent.parent / "data" / "projects.json"
+    log_file = Path(__file__).parent.parent.parent / "logs" / "projects.log"
+
     def __init__(self):
         super().__init__()
-        self.data_file = Path(__file__).parent.parent.parent / "data" / "projects.json"
-        self.log_file = Path(__file__).parent.parent.parent / "logs" / "projects.log"
         self._ensure_data_dir_exists()
-
-        # Инициализация логгера
         self.logger = setup_logger("ProjectsTab", self.log_file)
-        self.logger.info("Инициализация ProjectsTab")
-
         self.projects_data = []
         self._init_ui()
         self._load_projects()
