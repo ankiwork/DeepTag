@@ -1,12 +1,9 @@
 import json
-from pathlib import Path
-from typing import TextIO
-from unittest.mock import patch
-
 import pytest
+from pathlib import Path
+from unittest.mock import patch
 from PyQt6.QtWidgets import QApplication, QInputDialog
 
-# Инициализация QApplication для тестов
 app = QApplication([])
 
 
@@ -23,20 +20,19 @@ def projects_tab(tmp_path: Path):
     log_file = logs_dir / "projects.log"
 
     with patch('project.app.ui.tabs.projects_tab.ProjectsTab.data_file', data_file), \
-            patch('project.app.ui.tabs.projects_tab.ProjectsTab.log_file', log_file):
+         patch('project.app.ui.tabs.projects_tab.ProjectsTab.log_file', log_file):
+
         from project.app.ui.tabs.projects_tab import ProjectsTab
         tab = ProjectsTab()
         yield tab
 
-        # Корректное закрытие логгера
         handlers = tab.logger.handlers[:]
         for handler in handlers:
             handler.close()
             tab.logger.removeHandler(handler)
 
-    # Безопасное удаление временных файлов
     data_file.unlink(missing_ok=True)
-    log_file.unlink(missing_ok=True)
+    log_file.unlink(missing_ok=True)    
 
 
 def test_initialization(projects_tab):
@@ -75,7 +71,7 @@ def test_load_and_save_projects(projects_tab):
     test_data = [{"name": "Test", "date": "2023-01-01", "time": "12:00"}]
 
     # Явное указание типа для файла
-    with open(projects_tab.data_file, 'w', encoding='utf-8') as f:  # type: TextIO
+    with open(projects_tab.data_file, 'w', encoding='utf-8') as f:
         json.dump(test_data, f)
 
     projects_tab._load_projects()
@@ -84,7 +80,7 @@ def test_load_and_save_projects(projects_tab):
     projects_tab.projects_data[0]["name"] = "Updated"
     projects_tab._save_projects()
 
-    with open(projects_tab.data_file, 'r', encoding='utf-8') as f:  # type: TextIO
+    with open(projects_tab.data_file, 'r', encoding='utf-8') as f:
         saved = json.load(f)
     assert saved[0]["name"] == "Updated"
 
