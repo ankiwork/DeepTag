@@ -45,7 +45,6 @@ class SettingsTab(QWidget):
         super().__init__()
         self.log_file = Path(__file__).parent.parent.parent / "logs" / "settings.log"
 
-        # Инициализация логгера
         self.logger = setup_logger("SettingsTab", self.log_file)
         self.logger.info("Инициализация компонента SettingsTab")
 
@@ -60,17 +59,14 @@ class SettingsTab(QWidget):
         main_layout = QVBoxLayout()
         main_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
-        # Заголовок "В разработке"
         dev_label = QLabel("⚙️ Настройки в разработке ⚙️")
         dev_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         dev_label.setStyleSheet("font-size: 16px; color: #666; font-weight: bold;")
         main_layout.addWidget(dev_label)
 
-        # Секции настроек
         self._setup_theme_section(main_layout)
         self._setup_language_section(main_layout)
 
-        # Пояснительный текст
         info_label = QLabel("Эти функции временно недоступны\nи находятся в активной разработке")
         info_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         info_label.setStyleSheet("color: #888; font-size: 12px;")
