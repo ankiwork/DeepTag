@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QMainWindow, QTabWidget
 
-from project.app.ui.tabs.projects_tab import ProjectsTab
-from project.app.ui.tabs.settings_tab import SettingsTab
+from project.app.ui.projects_tab import ProjectsTab
+from project.app.ui.settings_tab import SettingsTab
 
 
 def _setup_tabs(tab_widget: QTabWidget) -> None:

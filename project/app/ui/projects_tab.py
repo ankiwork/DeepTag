@@ -2,7 +2,6 @@ import json
 from pathlib import Path
 from datetime import datetime
 from PyQt6.QtWidgets import *
-
 from project.app.utils.logger import setup_logger
 
 
@@ -132,7 +131,6 @@ class ProjectsTab(QWidget):
 
         old_name = project["name"]
 
-        # Диалог изменения
         new_name, ok = QInputDialog.getText(
             self,
             "Изменение проекта",
