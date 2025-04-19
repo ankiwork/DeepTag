@@ -9,7 +9,6 @@ from project.app.utils.logger import setup_logger
 class ProjectsTab(QWidget):
     """Вкладка для управления проектами с сохранением в JSON."""
 
-    # Добавляем атрибуты класса
     data_file = Path(__file__).parent.parent.parent / "data" / "projects.json"
     log_file = Path(__file__).parent.parent.parent / "logs" / "projects.log"
 
@@ -25,12 +24,8 @@ class ProjectsTab(QWidget):
         """Инициализация интерфейса."""
         main_layout = QVBoxLayout()
 
-        # Панель управления
         self._setup_control_panel(main_layout)
-
-        # Таблица проектов
         self._setup_projects_table(main_layout)
-
         self.setLayout(main_layout)
 
     def _ensure_data_dir_exists(self) -> None:
@@ -41,11 +36,9 @@ class ProjectsTab(QWidget):
         """Настраивает панель управления проектами."""
         control_layout = QHBoxLayout()
 
-        # Поле ввода
         self.project_name_input = QLineEdit()
         self.project_name_input.setPlaceholderText("Название проекта")
 
-        # Кнопки
         add_button = QPushButton("Добавить")
         add_button.clicked.connect(self._add_project)
 
@@ -55,7 +48,6 @@ class ProjectsTab(QWidget):
         delete_button = QPushButton("Удалить")
         delete_button.clicked.connect(self._delete_project)
 
-        # Добавление элементов
         control_layout.addWidget(self.project_name_input, stretch=4)
         control_layout.addWidget(add_button, stretch=1)
         control_layout.addWidget(edit_button, stretch=1)
@@ -69,15 +61,13 @@ class ProjectsTab(QWidget):
         self.table.setColumnCount(3)
         self.table.setHorizontalHeaderLabels(["Название", "Дата создания", "Время создания"])
 
-        # Настройка растягивания столбцов
         header = self.table.horizontalHeader()
-        header.setSectionResizeMode(QHeaderView.ResizeMode.Stretch)  # Равномерное растягивание
+        header.setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
 
         self.table.verticalHeader().setVisible(False)
         self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
 
-        # Принудительное обновление размеров после загрузки данных
         self.table.resizeColumnsToContents()
 
         layout.addWidget(self.table)
@@ -153,7 +143,6 @@ class ProjectsTab(QWidget):
 
         if ok and new_name.strip():
             if new_name.strip() != old_name:
-                # Проверка на уникальность имени
                 if any(p["name"] == new_name.strip() for p in self.projects_data):
                     error_msg = f"Попытка изменить проект на существующее имя: {new_name.strip()}"
                     self.logger.warning(error_msg)
@@ -174,7 +163,6 @@ class ProjectsTab(QWidget):
 
         project_name = project["name"]
 
-        # Диалог подтверждения
         confirm_dialog = QInputDialog(self)
         confirm_dialog.setWindowTitle("Подтверждение удаления")
         confirm_dialog.setLabelText(
