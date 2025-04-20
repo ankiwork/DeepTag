@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 from datetime import datetime
 from PyQt6.QtWidgets import *
+
 from project.app.utils.logger import setup_logger
 
 
