@@ -69,9 +69,30 @@ class SubprojectsTab(QWidget):
 
         bottom_panel = QFrame()
         bottom_panel.setFrameShape(QFrame.Shape.StyledPanel)
+        bottom_panel.setStyleSheet("background-color: #2D2D2D;")
 
         bottom_layout = QVBoxLayout(bottom_panel)
-        bottom_layout.addWidget(QLabel("Содержимое проекта будет отображаться здесь"))
+        bottom_layout.setContentsMargins(0, 10, 0, 0)
+
+        # Контейнер для центрирования
+        container = QWidget()
+        container_layout = QHBoxLayout(container)
+        container_layout.setContentsMargins(0, 0, 0, 0)
+
+        self.project_content_label = QLabel("Содержимое проекта будет отображаться здесь")
+        self.project_content_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.project_content_label.setStyleSheet("""
+                QLabel {
+                    color: white;
+                    font-size: 18px;
+                    font-weight: bold;
+                    padding: 10px;
+                    text-transform: uppercase;
+                }
+            """)
+
+        container_layout.addWidget(self.project_content_label)
+        bottom_layout.addWidget(container, alignment=Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignHCenter)
 
         main_layout.addWidget(top_panel)
         main_layout.addWidget(separator)
@@ -150,7 +171,10 @@ class SubprojectsTab(QWidget):
         if 0 <= self.current_project_index < len(self.filtered_projects):
             project_name = self.filtered_projects[self.current_project_index]["name"]
             self.logger.info(f"Открытие проекта: {project_name}")
+
             QMessageBox.information(self, "Открытие проекта", f"Проект '{project_name}' будет открыт")
+
+            self.project_content_label.setText(f"открыт проект: {project_name.upper()}")
 
     def _update_navigation(self) -> None:
         """Обновляет состояние навигации и отображение проекта"""
