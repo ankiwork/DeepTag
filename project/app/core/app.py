@@ -2,15 +2,13 @@ from PyQt6.QtWidgets import QMainWindow, QTabWidget
 
 from project.app.ui.projects_tab import ProjectsTab
 from project.app.ui.settings_tab import SettingsTab
+from project.app.ui.subprojects_tab import SubprojectsTab
 
 
 def _setup_tabs(tab_widget: QTabWidget) -> None:
-    """Добавляет и настраивает вкладки.
-
-    Args:
-        tab_widget: Виджет для управления вкладками.
-    """
+    """Добавляет и настраивает вкладки."""
     tab_widget.addTab(ProjectsTab(), "Проекты")
+    tab_widget.addTab(SubprojectsTab(), "Подпроекты")
     tab_widget.addTab(SettingsTab(), "Настройки")
 
 
@@ -18,7 +16,6 @@ class MainWindow(QMainWindow):
     """Главное окно приложения с вкладками."""
 
     def __init__(self) -> None:
-        """Инициализирует главное окно с настройками по умолчанию."""
         super().__init__()
         self._setup_window()
         self._init_ui()
