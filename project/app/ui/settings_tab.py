@@ -4,7 +4,7 @@ from project.app.utils.logger import setup_logger
 
 
 class SettingsTab(QWidget):
-    """Пустая вкладка настроек для последующего наполнения."""
+    """Пустая вкладка настроек для последующего наполнения"""
 
     def __init__(self):
         super().__init__()
@@ -14,6 +14,6 @@ class SettingsTab(QWidget):
         self._init_ui()
 
     def _init_ui(self) -> None:
-        """Инициализация базового интерфейса."""
+        """Инициализация базового интерфейса"""
         layout = QVBoxLayout()
         self.setLayout(layout)
