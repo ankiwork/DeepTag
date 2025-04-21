@@ -19,8 +19,8 @@ def projects_tab(tmp_path: Path):
     data_file = data_dir / "projects.json"
     log_file = logs_dir / "projects.log"
 
-    with patch('project.app.ui.tabs.projects_tab.ProjectsTab.data_file', data_file), \
-         patch('project.app.ui.tabs.projects_tab.ProjectsTab.log_file', log_file):
+    with patch('project.app.ui.projects_tab.ProjectsTab.data_file', data_file), \
+         patch('project.app.ui.projects_tab.ProjectsTab.log_file', log_file):
 
         from project.app.ui.projects_tab import ProjectsTab
         tab = ProjectsTab()
