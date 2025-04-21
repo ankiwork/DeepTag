@@ -1,31 +1,16 @@
 import json
 import pytest
-from pathlib import Path
-from typing import Optional
+from PyQt6.QtWidgets import *
+from PyQt6.QtTest import QSignalSpy
+from PyQt6.QtCore import QCoreApplication
 from unittest.mock import patch, MagicMock
-from PyQt6.QtCore import QObject, pyqtSignal
-from PyQt6.QtWidgets import QApplication, QMessageBox
 
 app = QApplication([])
 
 
 @pytest.fixture
-def projects_tab():
-    """Фикстура-заглушка для ProjectsTab с сигналом projects_updated"""
-
-    class DummyProjectsTab(QObject):
-        projects_updated = pyqtSignal()
-
-        def __init__(self):
-            super().__init__()
-            self.projects_data = None
-
-    return DummyProjectsTab()
-
-
-@pytest.fixture
-def subprojects_tab(tmp_path: Path, projects_tab: Optional[QObject] = None):
-    """Фикстура для создания тестового экземпляра SubprojectsTab"""
+def projects_tab(tmp_path):
+    """Фикстура для создания тестового экземпляра ProjectsTab"""
     data_dir = tmp_path / "project" / "app" / "data"
     logs_dir = tmp_path / "project" / "app" / "logs"
 
@@ -33,17 +18,12 @@ def subprojects_tab(tmp_path: Path, projects_tab: Optional[QObject] = None):
     logs_dir.mkdir(parents=True, exist_ok=True)
 
     data_file = data_dir / "projects.json"
-    log_file = logs_dir / "subprojects.log"
+    log_file = logs_dir / "projects.log"
 
-    with patch('project.app.ui.subprojects_tab.SubprojectsTab.projects_file', data_file), \
-         patch('project.app.ui.subprojects_tab.SubprojectsTab.log_file', log_file):
-
-        from project.app.ui.subprojects_tab import SubprojectsTab
-        tab = SubprojectsTab(projects_tab) if projects_tab else SubprojectsTab()
-
-        if projects_tab:
-            projects_tab.projects_updated.connect(tab._reload_projects)  # type: ignore
-
+    with patch('project.app.ui.projects_tab.ProjectsTab.data_file', data_file), \
+            patch('project.app.ui.projects_tab.ProjectsTab.log_file', log_file):
+        from project.app.ui.projects_tab import ProjectsTab
+        tab = ProjectsTab()
         yield tab
 
         handlers = tab.logger.handlers[:]
@@ -55,167 +35,176 @@ def subprojects_tab(tmp_path: Path, projects_tab: Optional[QObject] = None):
     log_file.unlink(missing_ok=True)
 
 
-def test_initialization(subprojects_tab):
+def test_projects_updated_signal(projects_tab):
+    """Тест испускания сигнала при изменении проектов"""
+    spy = QSignalSpy(projects_tab.projects_updated)
+
+    projects_tab.project_name_input.setText("Test Project")
+    projects_tab._add_project()
+    assert len(spy) == 1
+
+    projects_tab.table.setCurrentCell(0, 0)
+    with patch.object(QInputDialog, 'getText', return_value=("Edited Project", True)):
+        projects_tab._edit_project()
+    assert len(spy) == 2
+
+    with patch.object(QMessageBox, 'question', return_value=QMessageBox.StandardButton.Yes):
+        projects_tab._delete_project()
+    assert len(spy) == 3
+
+    QCoreApplication.processEvents()
+
+
+def test_initialization(projects_tab):
     """Тест инициализации класса"""
-    assert subprojects_tab.projects == []
-    assert subprojects_tab.filtered_projects == []
-    assert subprojects_tab.current_project_index == -1
-    assert subprojects_tab.project_label.text() in ["Выберите проект", "Проекты не найдены"]
-    assert subprojects_tab.search_input.placeholderText() == "Поиск проекта..."
-    assert not subprojects_tab.prev_button.isEnabled()
-    assert not subprojects_tab.next_button.isEnabled()
-    assert not subprojects_tab.open_button.isEnabled()
+    assert projects_tab.projects_data == []
+    assert projects_tab.table.rowCount() == 0
+    assert projects_tab.table.columnCount() == 3
+    assert projects_tab.table.horizontalHeaderItem(0).text() == "Название"
+    assert projects_tab.table.horizontalHeaderItem(1).text() == "Дата создания"
+    assert projects_tab.table.horizontalHeaderItem(2).text() == "Время создания"
+    assert "background-color: #3D3D3D" in projects_tab.table.styleSheet()
+    assert "background-color: #2D2D2D" in projects_tab.project_name_input.parent().styleSheet()
 
 
-def test_load_projects(subprojects_tab):
-    """Тест загрузки проектов"""
-    test_data = [
-        {"name": "Project 1", "date": "2023-01-01", "time": "12:00"},
-        {"name": "Project 2", "date": "2023-01-02", "time": "13:00"}
-    ]
+def test_add_project(projects_tab):
+    """Тест добавления проекта"""
+    test_name = "Test Project"
+    projects_tab.project_name_input.setText(test_name)
+    projects_tab._add_project()
 
-    with open(subprojects_tab.projects_file, 'w', encoding='utf-8') as f:
+    assert len(projects_tab.projects_data) == 1
+    assert projects_tab.projects_data[0]["name"] == test_name
+    assert projects_tab.table.rowCount() == 1
+    assert projects_tab.table.item(0, 0).text() == test_name
+    assert projects_tab.project_name_input.text() == ""
+
+
+def test_add_empty_project(projects_tab):
+    """Тест попытки добавления проекта без имени"""
+    initial_count = len(projects_tab.projects_data)
+
+    mock = MagicMock()
+    with patch.object(QMessageBox, 'warning', mock):
+        projects_tab._add_project()
+
+    assert len(projects_tab.projects_data) == initial_count
+    mock.assert_called_once()
+
+
+def test_add_duplicate_project(projects_tab):
+    """Тест добавления дубликата проекта"""
+    test_name = "Test Project"
+    projects_tab.project_name_input.setText(test_name)
+    projects_tab._add_project()
+
+    projects_tab.project_name_input.setText(test_name)
+
+    mock = MagicMock()
+    with patch.object(QMessageBox, 'warning', mock):
+        projects_tab._add_project()
+
+    assert len(projects_tab.projects_data) == 1
+    mock.assert_called_once()
+
+
+def test_load_and_save_projects(projects_tab):
+    """Тест загрузки и сохранения проектов"""
+    test_data = [{"name": "Test", "date": "2023-01-01", "time": "12:00:00"}]
+
+    with open(projects_tab.data_file, 'w', encoding='utf-8') as f:
         json.dump(test_data, f)  # type: ignore
 
-    subprojects_tab._load_projects()
+    projects_tab._load_projects()
+    assert len(projects_tab.projects_data) == 1
+    assert projects_tab.table.rowCount() == 1
 
-    assert len(subprojects_tab.projects) == 2
-    assert len(subprojects_tab.filtered_projects) == 2
-    assert subprojects_tab.current_project_index == 0
-    assert subprojects_tab.project_label.text() == "Выбран проект: Project 1"
-    assert subprojects_tab.prev_button.isEnabled() is False
-    assert subprojects_tab.next_button.isEnabled() is True
-    assert subprojects_tab.open_button.isEnabled() is True
+    assert projects_tab.table.item(0, 0).text() == "Test"
+    assert projects_tab.table.item(0, 1).text() == "2023-01-01"
+    assert projects_tab.table.item(0, 2).text() == "12:00:00"
 
+    projects_tab.projects_data[0]["name"] = "Modified"
+    projects_tab._save_projects()
 
-def test_filter_projects(subprojects_tab):
-    """Тест фильтрации проектов"""
-    test_data = [
-        {"name": "Alpha", "date": "2023-01-01", "time": "12:00"},
-        {"name": "Beta", "date": "2023-01-02", "time": "13:00"},
-        {"name": "Gamma", "date": "2023-01-03", "time": "14:00"}
-    ]
-    subprojects_tab.projects = test_data
-    subprojects_tab.filtered_projects = test_data.copy()
-    subprojects_tab.current_project_index = 0
+    with open(projects_tab.data_file, 'r', encoding='utf-8') as f:
+        saved_data = json.load(f)
 
-    subprojects_tab._filter_projects("a")
-    assert len(subprojects_tab.filtered_projects) == 3
-    assert subprojects_tab.current_project_index == 0
-
-    subprojects_tab._filter_projects("Beta")
-    assert len(subprojects_tab.filtered_projects) == 1
-    assert subprojects_tab.filtered_projects[0]["name"] == "Beta"
-    assert subprojects_tab.current_project_index == 0
-
-    subprojects_tab._filter_projects("")
-    assert len(subprojects_tab.filtered_projects) == 3
+    assert saved_data[0]["name"] == "Modified"
 
 
-def test_navigation(subprojects_tab):
-    """Тест навигации по проектам"""
-    test_data = [
-        {"name": "First", "date": "2023-01-01", "time": "12:00"},
-        {"name": "Second", "date": "2023-01-02", "time": "13:00"}
-    ]
-    subprojects_tab.projects = test_data
-    subprojects_tab.filtered_projects = test_data.copy()
-    subprojects_tab.current_project_index = 0
+def test_edit_project(projects_tab):
+    """Тест редактирования проекта"""
+    projects_tab.projects_data = [{"name": "Old", "date": "2023-01-01", "time": "12:00:00"}]
+    projects_tab._update_table()
+    projects_tab.table.setCurrentCell(0, 0)
 
-    subprojects_tab._next_project()
-    assert subprojects_tab.current_project_index == 1
-    assert subprojects_tab.project_label.text() == "Выбран проект: Second"
-    assert subprojects_tab.prev_button.isEnabled() is True
-    assert subprojects_tab.next_button.isEnabled() is False
+    with patch.object(QInputDialog, 'getText', return_value=("New", True)):
+        projects_tab._edit_project()
 
-    subprojects_tab._prev_project()
-    assert subprojects_tab.current_project_index == 0
-    assert subprojects_tab.project_label.text() == "Выбран проект: First"
+    assert projects_tab.projects_data[0]["name"] == "New"
+    assert projects_tab.table.item(0, 0).text() == "New"
 
 
-def test_open_project(subprojects_tab, monkeypatch: pytest.MonkeyPatch):
-    """Тест открытия проекта"""
-    test_data = [{"name": "Test Project", "date": "2023-01-01", "time": "12:00"}]
-    subprojects_tab.projects = test_data
-    subprojects_tab.filtered_projects = test_data.copy()
-    subprojects_tab.current_project_index = 0
+def test_edit_project_cancel(projects_tab):
+    """Тест отмены редактирования проекта"""
+    projects_tab.projects_data = [{"name": "Original", "date": "2023-01-01", "time": "12:00:00"}]
+    projects_tab._update_table()
+    projects_tab.table.setCurrentCell(0, 0)
 
-    mock_msgbox = MagicMock()
-    monkeypatch.setattr(QMessageBox, 'information', mock_msgbox)
+    with patch.object(QInputDialog, 'getText', return_value=("", False)):
+        projects_tab._edit_project()
 
-    subprojects_tab._open_project()
-
-    mock_msgbox.assert_called_once()
-    assert "Test Project" in mock_msgbox.call_args[0][2]
+    assert projects_tab.projects_data[0]["name"] == "Original"
 
 
-def test_search_project(subprojects_tab):
-    """Тест поиска проекта по точному совпадению"""
-    test_data = [
-        {"name": "Apple", "date": "2023-01-01", "time": "12:00"},
-        {"name": "Banana", "date": "2023-01-02", "time": "13:00"}
-    ]
-    subprojects_tab.projects = test_data
-    subprojects_tab.filtered_projects = test_data.copy()
-    subprojects_tab.current_project_index = 0
+def test_delete_project(projects_tab):
+    """Тест удаления проекта"""
+    projects_tab.projects_data = [{"name": "To Delete", "date": "2023-01-01", "time": "12:00:00"}]
+    projects_tab._update_table()
+    projects_tab.table.setCurrentCell(0, 0)
 
-    subprojects_tab.search_input.setText("Banana")
-    subprojects_tab._filter_projects("Banana")
-    subprojects_tab._search_project()
+    with patch.object(QMessageBox, 'question', return_value=QMessageBox.StandardButton.Yes):
+        projects_tab._delete_project()
 
-    assert len(subprojects_tab.filtered_projects) == 1
-    assert subprojects_tab.filtered_projects[0]["name"] == "Banana"
-    assert subprojects_tab.current_project_index == 0
+    assert len(projects_tab.projects_data) == 0
+    assert projects_tab.table.rowCount() == 0
 
 
-def test_update_navigation_no_projects(subprojects_tab):
-    """Тест обновления навигации при отсутствии проектов"""
-    subprojects_tab._update_navigation()
+def test_delete_project_cancel(projects_tab):
+    """Тест отмены удаления проекта"""
+    projects_tab.projects_data = [{"name": "Not Deleted", "date": "2023-01-01", "time": "12:00:00"}]
+    projects_tab._update_table()
+    projects_tab.table.setCurrentCell(0, 0)
 
-    assert subprojects_tab.project_label.text() == "Проекты не найдены"
-    assert not subprojects_tab.prev_button.isEnabled()
-    assert not subprojects_tab.next_button.isEnabled()
-    assert not subprojects_tab.open_button.isEnabled()
+    with patch.object(QMessageBox, 'question', return_value=QMessageBox.StandardButton.No):
+        projects_tab._delete_project()
 
-
-def test_update_project_display(subprojects_tab):
-    """Тест обновления отображения проекта"""
-    subprojects_tab._update_project_display("New Project")
-
-    assert subprojects_tab.project_label.text() == "Выбран проект: New Project"
-    assert subprojects_tab.search_input.text() == ""
+    assert len(projects_tab.projects_data) == 1
 
 
-def test_subprojects_update_on_projects_change(projects_tab, subprojects_tab, tmp_path):
-    """Тест обновления подпроектов при изменении проектов"""
-    test_data = [{"name": "Test", "date": "2023-01-01", "time": "12:00"}]
+def test_get_selected_project(projects_tab):
+    """Тест получения выбранного проекта"""
+    assert projects_tab._get_selected_project() is None
 
-    assert len(subprojects_tab.projects) == 0
+    projects_tab.projects_data = [{"name": "Test", "date": "2023-01-01", "time": "12:00:00"}]
+    projects_tab._update_table()
+    projects_tab.table.setCurrentCell(0, 0)
 
-    with open(subprojects_tab.projects_file, 'w', encoding='utf-8') as f:
-        json.dump(test_data, f)  # type: ignore
-
-    assert subprojects_tab.projects_file.exists()
-
-    projects_tab.projects_updated.emit()  # type: ignore
-
-    assert len(subprojects_tab.projects) == 1
-    assert subprojects_tab.projects[0]["name"] == "Test"
+    selected = projects_tab._get_selected_project()
+    assert selected is not None
+    assert selected["name"] == "Test"
 
 
-def test_reload_projects(subprojects_tab):
-    """Тест перезагрузки проектов"""
-    test_data = [{"name": "Test", "date": "2023-01-01", "time": "12:00"}]
-    subprojects_tab.projects = test_data
-    subprojects_tab.filtered_projects = test_data.copy()
-    subprojects_tab.current_project_index = 0
+def test_table_selection_behavior(projects_tab):
+    """Тест поведения таблицы при выборе"""
+    assert projects_tab.table.selectionBehavior() == QTableWidget.SelectionBehavior.SelectRows
+    assert projects_tab.table.editTriggers() == QTableWidget.EditTrigger.NoEditTriggers
 
-    new_data = [{"name": "New", "date": "2023-01-02", "time": "13:00"}]
-    with open(subprojects_tab.projects_file, 'w', encoding='utf-8') as f:
-        json.dump(new_data, f)  # type: ignore
 
-    subprojects_tab._reload_projects()
-
-    assert len(subprojects_tab.projects) == 1
-    assert subprojects_tab.projects[0]["name"] == "New"
-    assert subprojects_tab.current_project_index == 0
+def test_table_header_resizing(projects_tab):
+    """Тест поведения заголовков таблицы"""
+    header = projects_tab.table.horizontalHeader()
+    assert header.sectionResizeMode(0) == QHeaderView.ResizeMode.Stretch
+    assert header.sectionResizeMode(1) == QHeaderView.ResizeMode.Stretch
+    assert header.sectionResizeMode(2) == QHeaderView.ResizeMode.Stretch
+    assert not projects_tab.table.verticalHeader().isVisible()
