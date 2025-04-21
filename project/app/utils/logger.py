@@ -5,7 +5,7 @@ from datetime import datetime
 
 
 class JsonFormatter(logging.Formatter):
-    """Форматирует логи в JSON-формат."""
+    """Форматирует логи в JSON-формат"""
     def format(self, record):
         log_record = {
             "timestamp": datetime.now().isoformat(),
@@ -21,7 +21,7 @@ class JsonFormatter(logging.Formatter):
 
 
 def setup_logger(name: str, log_file: Path) -> logging.Logger:
-    """Настраивает и возвращает логгер."""
+    """Настраивает и возвращает логгер"""
     log_file.parent.mkdir(parents=True, exist_ok=True)
 
     logger = logging.getLogger(name)

@@ -1,7 +1,8 @@
 import json
 from pathlib import Path
-from PyQt6.QtWidgets import *
 from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import *
+
 from project.app.utils.logger import setup_logger
 
 
@@ -24,7 +25,7 @@ class SubprojectsTab(QWidget):
             projects_tab.projects_updated.connect(self._reload_projects)
 
     def _init_ui(self) -> None:
-        """Инициализация интерфейса с разделением на две части."""
+        """Инициализация интерфейса с разделением на две части"""
         main_layout = QVBoxLayout()
         main_layout.setContentsMargins(5, 5, 5, 5)
         main_layout.setSpacing(5)
@@ -80,7 +81,7 @@ class SubprojectsTab(QWidget):
         self._update_navigation()
 
     def _load_projects(self) -> None:
-        """Загружает список проектов из файла."""
+        """Загружает список проектов из файла"""
         try:
             if self.projects_file.exists():
                 with open(self.projects_file, 'r', encoding='utf-8') as f:
@@ -101,7 +102,7 @@ class SubprojectsTab(QWidget):
         self._update_navigation()
 
     def _filter_projects(self, text: str) -> None:
-        """Фильтрует проекты по введенному тексту."""
+        """Фильтрует проекты по введенному тексту"""
         if not text:
             self.filtered_projects = self.projects.copy()
         else:
@@ -118,7 +119,7 @@ class SubprojectsTab(QWidget):
         self._update_navigation()
 
     def _search_project(self) -> None:
-        """Ищет проект по точному совпадению."""
+        """Ищет проект по точному совпадению"""
         search_text = self.search_input.text().strip()
         if not search_text:
             self._filter_projects("")
@@ -133,26 +134,26 @@ class SubprojectsTab(QWidget):
         QMessageBox.information(self, "Поиск", "Проект не найден")
 
     def _prev_project(self) -> None:
-        """Переходит к предыдущему проекту."""
+        """Переходит к предыдущему проекту"""
         if self.filtered_projects and self.current_project_index > 0:
             self.current_project_index -= 1
             self._update_navigation()
 
     def _next_project(self) -> None:
-        """Переходит к следующему проекту."""
+        """Переходит к следующему проекту"""
         if self.filtered_projects and self.current_project_index < len(self.filtered_projects) - 1:
             self.current_project_index += 1
             self._update_navigation()
 
     def _open_project(self) -> None:
-        """Обрабатывает открытие выбранного проекта."""
+        """Обрабатывает открытие выбранного проекта"""
         if 0 <= self.current_project_index < len(self.filtered_projects):
             project_name = self.filtered_projects[self.current_project_index]["name"]
             self.logger.info(f"Открытие проекта: {project_name}")
             QMessageBox.information(self, "Открытие проекта", f"Проект '{project_name}' будет открыт")
 
     def _update_navigation(self) -> None:
-        """Обновляет состояние навигации и отображение проекта."""
+        """Обновляет состояние навигации и отображение проекта"""
         if not self.filtered_projects:
             self.project_label.setText("Проекты не найдены")
             self.prev_button.setEnabled(False)
@@ -168,7 +169,7 @@ class SubprojectsTab(QWidget):
             self._update_project_display(self.filtered_projects[self.current_project_index]["name"])
 
     def _update_project_display(self, project_name: str) -> None:
-        """Обновляет отображение выбранного проекта."""
+        """Обновляет отображение выбранного проекта"""
         self.project_label.setText(f"Выбран проект: {project_name}")
 
     def _reload_projects(self):

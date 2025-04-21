@@ -6,7 +6,7 @@ from project.app.ui.subprojects_tab import SubprojectsTab
 
 
 def _setup_tabs(tab_widget: QTabWidget) -> None:
-    """Добавляет и настраивает вкладки."""
+    """Добавляет и настраивает вкладки"""
     projects_tab = ProjectsTab()
     tab_widget.addTab(projects_tab, "Проекты")
     tab_widget.addTab(SubprojectsTab(projects_tab), "Подпроекты")
@@ -14,7 +14,7 @@ def _setup_tabs(tab_widget: QTabWidget) -> None:
 
 
 class MainWindow(QMainWindow):
-    """Главное окно приложения с вкладками."""
+    """Главное окно приложения с вкладками"""
 
     def __init__(self) -> None:
         super().__init__()

@@ -8,7 +8,7 @@ from project.app.utils.logger import setup_logger
 
 
 class ProjectsTab(QWidget):
-    """Вкладка для управления проектами с сохранением в JSON."""
+    """Вкладка для управления проектами с сохранением в JSON"""
 
     projects_updated = pyqtSignal()
 
@@ -24,7 +24,7 @@ class ProjectsTab(QWidget):
         self._load_projects()
 
     def _init_ui(self) -> None:
-        """Инициализация интерфейса."""
+        """Инициализация интерфейса"""
         main_layout = QVBoxLayout()
 
         self._setup_control_panel(main_layout)
@@ -32,11 +32,11 @@ class ProjectsTab(QWidget):
         self.setLayout(main_layout)
 
     def _ensure_data_dir_exists(self) -> None:
-        """Создает директорию data/, если её нет."""
+        """Создает директорию data/, если её нет"""
         self.data_file.parent.mkdir(parents=True, exist_ok=True)
 
     def _setup_control_panel(self, layout: QVBoxLayout) -> None:
-        """Настраивает панель управления проектами."""
+        """Настраивает панель управления проектами"""
         control_layout = QHBoxLayout()
 
         self.project_name_input = QLineEdit()
@@ -59,7 +59,7 @@ class ProjectsTab(QWidget):
         layout.addLayout(control_layout)
 
     def _setup_projects_table(self, layout: QVBoxLayout) -> None:
-        """Настраивает таблицу для отображения проектов."""
+        """Настраивает таблицу для отображения проектов"""
         self.table = QTableWidget()
         self.table.setColumnCount(3)
         self.table.setHorizontalHeaderLabels(["Название", "Дата создания", "Время создания"])
@@ -76,7 +76,7 @@ class ProjectsTab(QWidget):
         layout.addWidget(self.table)
 
     def _load_projects(self) -> None:
-        """Загружает проекты из JSON-файла."""
+        """Загружает проекты из JSON-файла"""
         try:
             if self.data_file.exists():
                 with open(self.data_file, 'r', encoding='utf-8') as f:
@@ -94,10 +94,10 @@ class ProjectsTab(QWidget):
             QMessageBox.warning(self, "Ошибка", error_msg)
 
     def _save_projects(self) -> None:
-        """Сохраняет проекты в JSON-файл."""
+        """Сохраняет проекты в JSON-файл"""
         try:
             with open(self.data_file, 'w', encoding='utf-8') as f:
-                json.dump(self.projects_data, f, indent=2, ensure_ascii=False)
+                json.dump(self.projects_data, f, indent=2, ensure_ascii=False)  # type: ignore
             self.logger.info(f"Успешно сохранено {len(self.projects_data)} проектов")
         except Exception as e:
             error_msg = f"Не удалось сохранить проекты: {str(e)}"
@@ -105,7 +105,7 @@ class ProjectsTab(QWidget):
             QMessageBox.warning(self, "Ошибка", error_msg)
 
     def _add_project(self) -> None:
-        """Добавляет новый проект."""
+        """Добавляет новый проект"""
         project_name = self.project_name_input.text().strip()
 
         if not project_name:
@@ -126,10 +126,10 @@ class ProjectsTab(QWidget):
         self._save_projects()
         self.project_name_input.clear()
         self.logger.info(f"Добавлен новый проект: {project_name}")
-        self.projects_updated.emit()
+        self.projects_updated.emit()  # type: ignore
 
     def _edit_project(self) -> None:
-        """Изменяет название выбранного проекта."""
+        """Изменяет название выбранного проекта"""
         project = self._get_selected_project()
         if not project:
             return
@@ -157,10 +157,10 @@ class ProjectsTab(QWidget):
                 self._update_table()
                 self._save_projects()
                 QMessageBox.information(self, "Успех", "Название проекта изменено")
-        self.projects_updated.emit()
+        self.projects_updated.emit()  # type: ignore
 
     def _delete_project(self) -> None:
-        """Удаляет выбранный проект после подтверждения."""
+        """Удаляет выбранный проект после подтверждения"""
         project = self._get_selected_project()
         if not project:
             return
@@ -189,10 +189,10 @@ class ProjectsTab(QWidget):
                 error_msg = f"Неверное подтверждение удаления для проекта {project_name}"
                 self.logger.warning(error_msg)
                 QMessageBox.warning(self, "Ошибка", "Название проекта не совпадает")
-        self.projects_updated.emit()
+        self.projects_updated.emit()  # type: ignore
 
     def _update_table(self) -> None:
-        """Обновляет данные в таблице."""
+        """Обновляет данные в таблице"""
         self.table.setRowCount(len(self.projects_data))
 
         for row, project in enumerate(self.projects_data):
@@ -201,7 +201,7 @@ class ProjectsTab(QWidget):
             self.table.setItem(row, 2, QTableWidgetItem(project.get("time", "")))
 
     def _get_selected_project(self) -> dict | None:
-        """Возвращает выбранный проект или None, если ничего не выбрано."""
+        """Возвращает выбранный проект или None, если ничего не выбрано"""
         selected_row = self.table.currentRow()
         if selected_row == -1:
             QMessageBox.warning(self, "Ошибка", "Выберите проект")

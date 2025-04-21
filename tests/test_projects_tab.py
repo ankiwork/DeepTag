@@ -11,7 +11,7 @@ app = QApplication([])
 
 @pytest.fixture
 def projects_tab(tmp_path: Path):
-    """Фикстура для создания тестового экземпляра ProjectsTab."""
+    """Фикстура для создания тестового экземпляра ProjectsTab"""
     data_dir = tmp_path / "project" / "app" / "data"
     logs_dir = tmp_path / "project" / "app" / "logs"
 
@@ -38,7 +38,7 @@ def projects_tab(tmp_path: Path):
 
 
 def test_projects_updated_signal(projects_tab):
-    """Тест испускания сигнала при изменении проектов."""
+    """Тест испускания сигнала при изменении проектов"""
     spy = QSignalSpy(projects_tab.projects_updated)
 
     projects_tab.project_name_input.setText("Test")
@@ -56,7 +56,7 @@ def test_projects_updated_signal(projects_tab):
 
 
 def test_initialization(projects_tab):
-    """Тест инициализации класса."""
+    """Тест инициализации класса"""
     assert projects_tab.projects_data == []
     assert projects_tab.table.rowCount() == 0
     assert projects_tab.table.columnCount() == 3
@@ -66,7 +66,7 @@ def test_initialization(projects_tab):
 
 
 def test_add_project(projects_tab):
-    """Тест добавления проекта."""
+    """Тест добавления проекта"""
     test_name = "Test Project"
     projects_tab.project_name_input.setText(test_name)
     projects_tab._add_project()
@@ -79,7 +79,7 @@ def test_add_project(projects_tab):
 
 
 def test_add_empty_project(projects_tab, caplog: pytest.LogCaptureFixture):
-    """Тест попытки добавления проекта без имени."""
+    """Тест попытки добавления проекта без имени"""
     initial_count = len(projects_tab.projects_data)
     projects_tab._add_project()
     assert len(projects_tab.projects_data) == initial_count
@@ -87,12 +87,12 @@ def test_add_empty_project(projects_tab, caplog: pytest.LogCaptureFixture):
 
 
 def test_load_and_save_projects(projects_tab):
-    """Тест загрузки и сохранения проектов."""
+    """Тест загрузки и сохранения проектов"""
     test_data = [{"name": "Test", "date": "2023-01-01", "time": "12:00"}]
 
     # Явное указание типа для файла
     with open(projects_tab.data_file, 'w', encoding='utf-8') as f:
-        json.dump(test_data, f)
+        json.dump(test_data, f)  # type: ignore
 
     projects_tab._load_projects()
     assert len(projects_tab.projects_data) == 1
@@ -106,7 +106,7 @@ def test_load_and_save_projects(projects_tab):
 
 
 def test_edit_project(projects_tab, monkeypatch: pytest.MonkeyPatch):
-    """Тест редактирования проекта."""
+    """Тест редактирования проекта"""
     projects_tab.projects_data = [{"name": "Old", "date": "2023-01-01", "time": "12:00"}]
     projects_tab._update_table()
     projects_tab.table.setCurrentCell(0, 0)
@@ -119,7 +119,7 @@ def test_edit_project(projects_tab, monkeypatch: pytest.MonkeyPatch):
 
 
 def test_delete_project(projects_tab, monkeypatch: pytest.MonkeyPatch):
-    """Тест удаления проекта."""
+    """Тест удаления проекта"""
     projects_tab.projects_data = [{"name": "To Delete", "date": "2023-01-01", "time": "12:00"}]
     projects_tab._update_table()
     projects_tab.table.setCurrentCell(0, 0)
@@ -133,7 +133,7 @@ def test_delete_project(projects_tab, monkeypatch: pytest.MonkeyPatch):
 
 
 def test_delete_project_cancel(projects_tab, monkeypatch: pytest.MonkeyPatch):
-    """Тест отмены удаления проекта."""
+    """Тест отмены удаления проекта"""
     projects_tab.projects_data = [{"name": "Not Deleted", "date": "2023-01-01", "time": "12:00"}]
     projects_tab._update_table()
     projects_tab.table.setCurrentCell(0, 0)
@@ -145,7 +145,7 @@ def test_delete_project_cancel(projects_tab, monkeypatch: pytest.MonkeyPatch):
 
 
 def test_get_selected_project(projects_tab):
-    """Тест получения выбранного проекта."""
+    """Тест получения выбранного проекта"""
     assert projects_tab._get_selected_project() is None
 
     projects_tab.projects_data = [{"name": "Test", "date": "2023-01-01", "time": "12:00"}]

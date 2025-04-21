@@ -1,5 +1,6 @@
 from pathlib import Path
 from PyQt6.QtWidgets import QWidget, QVBoxLayout
+
 from project.app.utils.logger import setup_logger
 
 

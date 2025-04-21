@@ -11,7 +11,7 @@ app = QApplication([])
 
 @pytest.fixture
 def projects_tab():
-    """Фикстура-заглушка для ProjectsTab с сигналом projects_updated."""
+    """Фикстура-заглушка для ProjectsTab с сигналом projects_updated"""
 
     class DummyProjectsTab(QObject):
         projects_updated = pyqtSignal()
@@ -25,7 +25,7 @@ def projects_tab():
 
 @pytest.fixture
 def subprojects_tab(tmp_path: Path, projects_tab: Optional[QObject] = None):
-    """Фикстура для создания тестового экземпляра SubprojectsTab."""
+    """Фикстура для создания тестового экземпляра SubprojectsTab"""
     data_dir = tmp_path / "project" / "app" / "data"
     logs_dir = tmp_path / "project" / "app" / "logs"
 
@@ -56,7 +56,7 @@ def subprojects_tab(tmp_path: Path, projects_tab: Optional[QObject] = None):
 
 
 def test_initialization(subprojects_tab):
-    """Тест инициализации класса."""
+    """Тест инициализации класса"""
     assert subprojects_tab.projects == []
     assert subprojects_tab.filtered_projects == []
     assert subprojects_tab.current_project_index == -1
@@ -68,7 +68,7 @@ def test_initialization(subprojects_tab):
 
 
 def test_load_projects(subprojects_tab):
-    """Тест загрузки проектов."""
+    """Тест загрузки проектов"""
     test_data = [
         {"name": "Project 1", "date": "2023-01-01", "time": "12:00"},
         {"name": "Project 2", "date": "2023-01-02", "time": "13:00"}
@@ -89,7 +89,7 @@ def test_load_projects(subprojects_tab):
 
 
 def test_filter_projects(subprojects_tab):
-    """Тест фильтрации проектов."""
+    """Тест фильтрации проектов"""
     test_data = [
         {"name": "Alpha", "date": "2023-01-01", "time": "12:00"},
         {"name": "Beta", "date": "2023-01-02", "time": "13:00"},
@@ -113,7 +113,7 @@ def test_filter_projects(subprojects_tab):
 
 
 def test_navigation(subprojects_tab):
-    """Тест навигации по проектам."""
+    """Тест навигации по проектам"""
     test_data = [
         {"name": "First", "date": "2023-01-01", "time": "12:00"},
         {"name": "Second", "date": "2023-01-02", "time": "13:00"}
@@ -134,7 +134,7 @@ def test_navigation(subprojects_tab):
 
 
 def test_open_project(subprojects_tab, monkeypatch: pytest.MonkeyPatch):
-    """Тест открытия проекта."""
+    """Тест открытия проекта"""
     test_data = [{"name": "Test Project", "date": "2023-01-01", "time": "12:00"}]
     subprojects_tab.projects = test_data
     subprojects_tab.filtered_projects = test_data.copy()
@@ -150,7 +150,7 @@ def test_open_project(subprojects_tab, monkeypatch: pytest.MonkeyPatch):
 
 
 def test_search_project(subprojects_tab):
-    """Тест поиска проекта по точному совпадению."""
+    """Тест поиска проекта по точному совпадению"""
     test_data = [
         {"name": "Apple", "date": "2023-01-01", "time": "12:00"},
         {"name": "Banana", "date": "2023-01-02", "time": "13:00"}
@@ -169,7 +169,7 @@ def test_search_project(subprojects_tab):
 
 
 def test_update_navigation_no_projects(subprojects_tab):
-    """Тест обновления навигации при отсутствии проектов."""
+    """Тест обновления навигации при отсутствии проектов"""
     subprojects_tab._update_navigation()
 
     assert subprojects_tab.project_label.text() == "Проекты не найдены"
@@ -179,7 +179,7 @@ def test_update_navigation_no_projects(subprojects_tab):
 
 
 def test_update_project_display(subprojects_tab):
-    """Тест обновления отображения проекта."""
+    """Тест обновления отображения проекта"""
     subprojects_tab._update_project_display("New Project")
 
     assert subprojects_tab.project_label.text() == "Выбран проект: New Project"
@@ -187,7 +187,7 @@ def test_update_project_display(subprojects_tab):
 
 
 def test_subprojects_update_on_projects_change(projects_tab, subprojects_tab, tmp_path):
-    """Тест обновления подпроектов при изменении проектов."""
+    """Тест обновления подпроектов при изменении проектов"""
     test_data = [{"name": "Test", "date": "2023-01-01", "time": "12:00"}]
 
     assert len(subprojects_tab.projects) == 0
@@ -195,7 +195,6 @@ def test_subprojects_update_on_projects_change(projects_tab, subprojects_tab, tm
     with open(subprojects_tab.projects_file, 'w', encoding='utf-8') as f:
         json.dump(test_data, f)  # type: ignore
 
-    # Убедимся, что файл существует перед эмитом сигнала
     assert subprojects_tab.projects_file.exists()
 
     projects_tab.projects_updated.emit()  # type: ignore
@@ -205,7 +204,7 @@ def test_subprojects_update_on_projects_change(projects_tab, subprojects_tab, tm
 
 
 def test_reload_projects(subprojects_tab):
-    """Тест перезагрузки проектов."""
+    """Тест перезагрузки проектов"""
     test_data = [{"name": "Test", "date": "2023-01-01", "time": "12:00"}]
     subprojects_tab.projects = test_data
     subprojects_tab.filtered_projects = test_data.copy()
