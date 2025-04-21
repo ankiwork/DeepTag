@@ -3,12 +3,26 @@ import pytest
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 from PyQt6.QtWidgets import QApplication, QMessageBox
+from PyQt6.QtCore import QObject, pyqtSignal
 
 app = QApplication([])
 
 
 @pytest.fixture
-def subprojects_tab(tmp_path: Path):
+def projects_tab():
+    """Фикстура-заглушка для ProjectsTab с сигналом projects_updated."""
+    class DummyProjectsTab(QObject):
+        projects_updated = pyqtSignal()
+
+        def __init__(self):
+            super().__init__()
+            self.projects_data = None
+
+    return DummyProjectsTab()
+
+
+@pytest.fixture
+def subprojects_tab(tmp_path: Path, projects_tab=None):
     """Фикстура для создания тестового экземпляра SubprojectsTab."""
     data_dir = tmp_path / "project" / "app" / "data"
     logs_dir = tmp_path / "project" / "app" / "logs"
@@ -23,7 +37,7 @@ def subprojects_tab(tmp_path: Path):
          patch('project.app.ui.subprojects_tab.SubprojectsTab.log_file', log_file):
 
         from project.app.ui.subprojects_tab import SubprojectsTab
-        tab = SubprojectsTab()
+        tab = SubprojectsTab(projects_tab) if projects_tab else SubprojectsTab()
         yield tab
 
         handlers = tab.logger.handlers[:]
@@ -164,3 +178,34 @@ def test_update_project_display(subprojects_tab):
 
     assert subprojects_tab.project_label.text() == "Выбран проект: New Project"
     assert subprojects_tab.search_input.text() == ""
+
+
+def test_subprojects_update_on_projects_change(projects_tab, subprojects_tab):
+    """Тест обновления подпроектов при изменении проектов."""
+    test_data = [{"name": "Test", "date": "2023-01-01", "time": "12:00"}]
+
+    assert len(subprojects_tab.projects) == 0
+
+    projects_tab.projects_data = test_data
+    projects_tab.projects_updated.emit()
+
+    assert len(subprojects_tab.projects) == 1
+    assert subprojects_tab.projects[0]["name"] == "Test"
+
+
+def test_reload_projects(subprojects_tab):
+    """Тест перезагрузки проектов."""
+    test_data = [{"name": "Test", "date": "2023-01-01", "time": "12:00"}]
+    subprojects_tab.projects = test_data
+    subprojects_tab.filtered_projects = test_data.copy()
+    subprojects_tab.current_project_index = 0
+
+    new_data = [{"name": "New", "date": "2023-01-02", "time": "13:00"}]
+    with open(subprojects_tab.projects_file, 'w', encoding='utf-8') as f:
+        json.dump(new_data, f)
+
+    subprojects_tab._reload_projects()
+
+    assert len(subprojects_tab.projects) == 1
+    assert subprojects_tab.projects[0]["name"] == "New"
+    assert subprojects_tab.current_project_index == 0

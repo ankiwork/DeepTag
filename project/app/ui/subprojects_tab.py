@@ -11,7 +11,7 @@ class SubprojectsTab(QWidget):
     log_file = Path(__file__).parent.parent.parent / "logs" / "subprojects.log"
     projects_file = Path(__file__).parent.parent.parent / "data" / "projects.json"
 
-    def __init__(self):
+    def __init__(self, projects_tab=None):
         super().__init__()
         self.logger = setup_logger("SubprojectsTab", self.log_file)
         self.projects = []
@@ -19,6 +19,9 @@ class SubprojectsTab(QWidget):
         self.current_project_index = -1
         self._init_ui()
         self._load_projects()
+
+        if projects_tab:
+            projects_tab.projects_updated.connect(self._reload_projects)
 
     def _init_ui(self) -> None:
         """Инициализация интерфейса с разделением на две части."""
@@ -167,3 +170,8 @@ class SubprojectsTab(QWidget):
     def _update_project_display(self, project_name: str) -> None:
         """Обновляет отображение выбранного проекта."""
         self.project_label.setText(f"Выбран проект: {project_name}")
+
+    def _reload_projects(self):
+        """Перезагружает список проектов"""
+        self._load_projects()
+        self._filter_projects(self.search_input.text())

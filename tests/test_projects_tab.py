@@ -2,6 +2,8 @@ import json
 import pytest
 from pathlib import Path
 from unittest.mock import patch
+from PyQt6.QtTest import QSignalSpy
+from PyQt6.QtCore import QCoreApplication
 from PyQt6.QtWidgets import QApplication, QInputDialog
 
 app = QApplication([])
@@ -32,7 +34,25 @@ def projects_tab(tmp_path: Path):
             tab.logger.removeHandler(handler)
 
     data_file.unlink(missing_ok=True)
-    log_file.unlink(missing_ok=True)    
+    log_file.unlink(missing_ok=True)
+
+
+def test_projects_updated_signal(projects_tab):
+    """Тест испускания сигнала при изменении проектов."""
+    spy = QSignalSpy(projects_tab.projects_updated)
+
+    projects_tab.project_name_input.setText("Test")
+    projects_tab._add_project()
+    assert len(spy) == 1
+
+    projects_tab.table.setCurrentCell(0, 0)
+    projects_tab._edit_project()
+    assert len(spy) == 2
+
+    projects_tab._delete_project()
+    assert len(spy) == 3
+
+    QCoreApplication.processEvents()
 
 
 def test_initialization(projects_tab):
