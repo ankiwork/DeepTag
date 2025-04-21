@@ -2,12 +2,15 @@ import json
 from pathlib import Path
 from datetime import datetime
 from PyQt6.QtWidgets import *
+from PyQt6.QtCore import pyqtSignal
 
 from project.app.utils.logger import setup_logger
 
 
 class ProjectsTab(QWidget):
     """Вкладка для управления проектами с сохранением в JSON."""
+
+    projects_updated = pyqtSignal()
 
     data_file = Path(__file__).parent.parent.parent / "data" / "projects.json"
     log_file = Path(__file__).parent.parent.parent / "logs" / "projects.log"
@@ -123,6 +126,7 @@ class ProjectsTab(QWidget):
         self._save_projects()
         self.project_name_input.clear()
         self.logger.info(f"Добавлен новый проект: {project_name}")
+        self.projects_updated.emit()
 
     def _edit_project(self) -> None:
         """Изменяет название выбранного проекта."""
@@ -153,6 +157,7 @@ class ProjectsTab(QWidget):
                 self._update_table()
                 self._save_projects()
                 QMessageBox.information(self, "Успех", "Название проекта изменено")
+        self.projects_updated.emit()
 
     def _delete_project(self) -> None:
         """Удаляет выбранный проект после подтверждения."""
@@ -184,6 +189,7 @@ class ProjectsTab(QWidget):
                 error_msg = f"Неверное подтверждение удаления для проекта {project_name}"
                 self.logger.warning(error_msg)
                 QMessageBox.warning(self, "Ошибка", "Название проекта не совпадает")
+        self.projects_updated.emit()
 
     def _update_table(self) -> None:
         """Обновляет данные в таблице."""

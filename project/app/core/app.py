@@ -7,8 +7,9 @@ from project.app.ui.subprojects_tab import SubprojectsTab
 
 def _setup_tabs(tab_widget: QTabWidget) -> None:
     """Добавляет и настраивает вкладки."""
-    tab_widget.addTab(ProjectsTab(), "Проекты")
-    tab_widget.addTab(SubprojectsTab(), "Подпроекты")
+    projects_tab = ProjectsTab()
+    tab_widget.addTab(projects_tab, "Проекты")
+    tab_widget.addTab(SubprojectsTab(projects_tab), "Подпроекты")
     tab_widget.addTab(SettingsTab(), "Настройки")
 
 
