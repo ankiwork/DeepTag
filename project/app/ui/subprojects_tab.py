@@ -173,5 +173,8 @@ class SubprojectsTab(QWidget):
 
     def _reload_projects(self):
         """Перезагружает список проектов"""
-        self._load_projects()
-        self._filter_projects(self.search_input.text())
+        try:
+            self._load_projects()
+            self._filter_projects(self.search_input.text())
+        except Exception as e:
+            self.logger.error(f"Ошибка перезагрузки проектов: {str(e)}")
