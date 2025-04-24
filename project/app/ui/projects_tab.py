@@ -11,6 +11,7 @@ class ProjectsTab(QWidget):
     """Вкладка для управления проектами с темным стилем"""
 
     projects_updated = pyqtSignal()
+
     data_file = Path(__file__).parent.parent.parent / "data" / "projects.json"
     log_file = Path(__file__).parent.parent.parent / "logs" / "projects.log"
 
