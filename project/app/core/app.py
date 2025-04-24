@@ -3,13 +3,18 @@ from PyQt6.QtWidgets import QMainWindow, QTabWidget
 from project.app.ui.projects_tab import ProjectsTab
 from project.app.ui.settings_tab import SettingsTab
 from project.app.ui.subprojects_tab import SubprojectsTab
+from project.app.ui.distribution_tab import DistributionTab
 
 
 def _setup_tabs(tab_widget: QTabWidget) -> None:
     """Добавляет и настраивает вкладки"""
     projects_tab = ProjectsTab()
+    subprojects_tab = SubprojectsTab(projects_tab)
+    distribution_tab = DistributionTab(projects_tab, subprojects_tab)
+
     tab_widget.addTab(projects_tab, "Проекты")
-    tab_widget.addTab(SubprojectsTab(projects_tab), "Подпроекты")
+    tab_widget.addTab(subprojects_tab, "Подпроекты")
+    tab_widget.addTab(distribution_tab, "Распределение")
     tab_widget.addTab(SettingsTab(), "Настройки")
 
 

@@ -1,14 +1,16 @@
 import json
 from pathlib import Path
-from PyQt6.QtCore import Qt
 from datetime import datetime
 from PyQt6.QtWidgets import *
+from PyQt6.QtCore import Qt, pyqtSignal
 
 from project.app.utils.logger import setup_logger
 
 
 class SubprojectsTab(QWidget):
     """Вкладка для работы с подпроектами внутри проектов"""
+
+    subprojects_updated = pyqtSignal()
 
     log_file = Path(__file__).parent.parent.parent / "logs" / "subprojects.log"
     projects_file = Path(__file__).parent.parent.parent / "data" / "projects.json"
@@ -333,10 +335,9 @@ class SubprojectsTab(QWidget):
         self._update_subprojects_table()
         self._save_current_project_data()
         self.subproject_name_input.clear()
-
         self._update_project_info()
-
         self.logger.info(f"Добавлен подпроект '{subproject_name}' в проект '{self.current_project_data['name']}'")
+        self.subprojects_updated.emit()  # type: ignore
 
     def _edit_subproject(self):
         """Редактирует выбранный подпроект"""
@@ -370,6 +371,7 @@ class SubprojectsTab(QWidget):
                 self._save_current_project_data()
                 self._update_project_info()
                 self.logger.info(f"Подпроект '{old_name}' переименован в '{new_name.strip()}'")
+                self.subprojects_updated.emit()  # type: ignore
 
     def _delete_subproject(self):
         """Удаляет выбранный подпроект"""
@@ -397,6 +399,7 @@ class SubprojectsTab(QWidget):
             self._save_current_project_data()
             self._update_project_info()
             self.logger.info(f"Удален подпроект '{subproject_name}'")
+            self.subprojects_updated.emit()  # type: ignore
 
     def _update_project_info(self):
         """Обновляет информацию о проекте на вкладке информации"""
