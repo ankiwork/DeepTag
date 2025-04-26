@@ -2,6 +2,7 @@ from PyQt6.QtWidgets import QMainWindow, QTabWidget
 
 from project.app.ui.projects_tab import ProjectsTab
 from project.app.ui.settings_tab import SettingsTab
+from project.app.ui.annotation_tab import AnnotationTab
 from project.app.ui.subprojects_tab import SubprojectsTab
 from project.app.ui.distribution_tab import DistributionTab
 
@@ -11,10 +12,16 @@ def _setup_tabs(tab_widget: QTabWidget) -> None:
     projects_tab = ProjectsTab()
     subprojects_tab = SubprojectsTab(projects_tab)
     distribution_tab = DistributionTab(projects_tab, subprojects_tab)
+    annotation_tab = AnnotationTab(
+        projects_tab=projects_tab,
+        subprojects_tab=subprojects_tab,
+        distribution_tab=distribution_tab
+    )
 
     tab_widget.addTab(projects_tab, "Проекты")
     tab_widget.addTab(subprojects_tab, "Подпроекты")
     tab_widget.addTab(distribution_tab, "Распределение")
+    tab_widget.addTab(annotation_tab, "Разметка")
     tab_widget.addTab(SettingsTab(), "Настройки")
 
 

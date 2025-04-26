@@ -2,12 +2,14 @@ import os
 import json
 from pathlib import Path
 from PyQt6.QtWidgets import *
-from PyQt6.QtCore import Qt, QMimeData, QPoint
+from PyQt6.QtCore import Qt, QMimeData, QPoint, pyqtSignal
 from PyQt6.QtGui import QDrag, QPixmap, QPainter
 
 
 class DistributionTab(QWidget):
     """Вкладка для управления кадрами в подпроектах"""
+
+    folders_updated = pyqtSignal()
 
     log_file = Path(__file__).parent.parent.parent / "logs" / "frames.log"
     projects_file = Path(__file__).parent.parent.parent / "data" / "projects.json"
@@ -242,6 +244,7 @@ class DistributionTab(QWidget):
             self._save_project_data()
             self._load_frames_for_subproject(subproject_name)
             self._deselect_all()
+            self.folders_updated.emit()  # type: ignore
 
     def _delete_folder(self):
         """Удаляет выбранную папку"""
@@ -263,6 +266,7 @@ class DistributionTab(QWidget):
             self._save_project_data()
             self._load_frames_for_subproject(subproject_name)
             self._deselect_all()
+            self.folders_updated.emit()  # type: ignore
 
     def _mouse_press_event(self, list_widget: QListWidget, event):
         if event.button() == Qt.MouseButton.LeftButton:
@@ -296,7 +300,8 @@ class DistributionTab(QWidget):
 
         drag.exec(Qt.DropAction.MoveAction)
 
-    def _drag_enter_event(self, list_widget: QListWidget, event):
+    @staticmethod
+    def _drag_enter_event(list_widget: QListWidget, event):
         if event.mimeData():
             event.acceptProposedAction()
             list_widget.setStyleSheet("""
@@ -309,11 +314,13 @@ class DistributionTab(QWidget):
                 }
             """)
 
-    def _drag_move_event(self, list_widget: QListWidget, event):
+    @staticmethod
+    def _drag_move_event(list_widget: QListWidget, event):
         if event.mimeData():
             event.acceptProposedAction()
 
-    def _drag_leave_event(self, list_widget: QListWidget, event):
+    @staticmethod
+    def _drag_leave_event(list_widget: QListWidget, event):
         list_widget.setStyleSheet("""
             QListWidget {
                 background-color: #3D3D3D;
@@ -421,8 +428,11 @@ class DistributionTab(QWidget):
 
         self._save_project_data()
         self._load_frames_for_subproject(subproject_name)
+        self.folders_updated.emit()  # type: ignore
 
-    def _create_folder_widget(self, folder_name: str, total_frames: int, marked_frames: int = 0) -> QWidget:
+
+    @staticmethod
+    def _create_folder_widget(folder_name: str, total_frames: int, marked_frames: int = 0) -> QWidget:
         widget = QWidget()
         widget.setStyleSheet("""
             QWidget {
@@ -711,6 +721,7 @@ class DistributionTab(QWidget):
 
         self._save_project_data()
         self._load_frames_for_subproject(subproject_name)
+        self.folders_updated.emit()  # type: ignore
 
         QMessageBox.information(
             self,
