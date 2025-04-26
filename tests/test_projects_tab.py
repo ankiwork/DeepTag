@@ -24,7 +24,7 @@ def projects_tab(tmp_path: Path):
     with patch('project.app.ui.projects_tab.ProjectsTab.data_file', data_file), \
          patch('project.app.ui.projects_tab.ProjectsTab.log_file', log_file):
 
-        from project.app.ui.projects_tab import ProjectsTab
+        from project.app.ui.projects import ProjectsTab
         tab = ProjectsTab()
         yield tab
 

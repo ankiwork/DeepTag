@@ -1,10 +1,10 @@
 from PyQt6.QtWidgets import QMainWindow, QTabWidget
 
-from project.app.ui.projects_tab import ProjectsTab
-from project.app.ui.settings_tab import SettingsTab
-from project.app.ui.annotation_tab import AnnotationTab
-from project.app.ui.subprojects_tab import SubprojectsTab
-from project.app.ui.distribution_tab import DistributionTab
+from project.app.ui.projects import ProjectsTab
+from project.app.ui.settings import SettingsTab
+from project.app.ui.annotation import AnnotationTab
+from project.app.ui.subprojects import SubprojectsTab
+from project.app.ui.distribution import DistributionTab
 
 
 def _setup_tabs(tab_widget: QTabWidget) -> None:

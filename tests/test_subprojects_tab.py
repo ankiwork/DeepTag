@@ -5,7 +5,7 @@ from PyQt6.QtCore import QCoreApplication
 from unittest.mock import patch, MagicMock
 from PyQt6.QtWidgets import QApplication, QMessageBox, QInputDialog
 
-from project.app.ui.subprojects_tab import SubprojectsTab
+from project.app.ui.subprojects import SubprojectsTab
 
 app = QApplication([])
 
@@ -24,7 +24,7 @@ def subprojects_tab(tmp_path):
 
     with patch('project.app.ui.subprojects_tab.SubprojectsTab.projects_file', projects_file), \
             patch('project.app.ui.subprojects_tab.SubprojectsTab.log_file', log_file):
-        from project.app.ui.subprojects_tab import SubprojectsTab
+        from project.app.ui.subprojects import SubprojectsTab
         tab = SubprojectsTab()
         yield tab
 
