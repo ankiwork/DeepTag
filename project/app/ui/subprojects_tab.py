@@ -1,6 +1,9 @@
 import json
 from pathlib import Path
 from datetime import datetime
+import random
+
+from PyQt6.QtGui import QColor, QAction, QIcon, QPixmap
 from PyQt6.QtWidgets import *
 from PyQt6.QtCore import Qt, pyqtSignal
 
@@ -133,7 +136,7 @@ class SubprojectsTab(QWidget):
         return panel
 
     def _setup_subprojects_ui(self):
-        """Настраивает UI для управления подпроектами"""
+        """Настраивает UI для управления подпроектами и классами объектов"""
         self.info_tab = QWidget()
         info_layout = QVBoxLayout(self.info_tab)
 
@@ -149,10 +152,12 @@ class SubprojectsTab(QWidget):
         """)
         info_layout.addWidget(self.project_info_label)
 
+        # Вкладка подпроектов
         self.subprojects_tab = QWidget()
         subprojects_layout = QVBoxLayout(self.subprojects_tab)
 
-        control_layout = QHBoxLayout()
+        # Панель управления подпроектами
+        subproject_control_layout = QHBoxLayout()
 
         self.subproject_name_input = QLineEdit()
         self.subproject_name_input.setPlaceholderText("Название подпроекта")
@@ -181,14 +186,15 @@ class SubprojectsTab(QWidget):
             }
         """)
 
-        control_layout.addWidget(self.subproject_name_input, stretch=4)
-        control_layout.addWidget(add_button, stretch=1)
-        control_layout.addWidget(edit_button, stretch=1)
-        control_layout.addWidget(delete_button, stretch=1)
+        subproject_control_layout.addWidget(self.subproject_name_input, stretch=4)
+        subproject_control_layout.addWidget(add_button, stretch=1)
+        subproject_control_layout.addWidget(edit_button, stretch=1)
+        subproject_control_layout.addWidget(delete_button, stretch=1)
 
+        # Таблица подпроектов
         self.subprojects_table = QTableWidget()
-        self.subprojects_table.setColumnCount(3)
-        self.subprojects_table.setHorizontalHeaderLabels(["Название", "Дата создания", "Время создания"])
+        self.subprojects_table.setColumnCount(4)  # Добавим колонку для цвета
+        self.subprojects_table.setHorizontalHeaderLabels(["Название", "Дата создания", "Время создания", "Классы"])
         self.subprojects_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.subprojects_table.verticalHeader().setVisible(False)
         self.subprojects_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
@@ -206,12 +212,97 @@ class SubprojectsTab(QWidget):
                 border: none;
             }
         """)
+        self.subprojects_table.itemSelectionChanged.connect(self._update_classes_ui)
 
-        subprojects_layout.addLayout(control_layout)
+        # Подсветка выбранной строки
+        self.subprojects_table.setStyleSheet("""
+            QTableWidget::item:selected {
+                background-color: #0066CC;
+                color: white;
+            }
+        """)
+
+        subprojects_layout.addLayout(subproject_control_layout)
+        subprojects_layout.addWidget(QLabel("Список подпроектов (выберите подпроект для работы с классами):"))
         subprojects_layout.addWidget(self.subprojects_table)
 
+        # Вкладка классов объектов
+        self.classes_tab = QWidget()
+        classes_layout = QVBoxLayout(self.classes_tab)
+
+        # Информация о выбранном подпроекте
+        self.selected_subproject_label = QLabel("Не выбран подпроект")
+        self.selected_subproject_label.setStyleSheet("""
+            QLabel {
+                color: #FFA500;
+                font-weight: bold;
+                font-size: 14px;
+            }
+        """)
+        classes_layout.addWidget(self.selected_subproject_label)
+
+        # Панель управления классами
+        classes_control_layout = QHBoxLayout()
+
+        self.class_name_input = QLineEdit()
+        self.class_name_input.setPlaceholderText("Название класса")
+        self.class_name_input.setStyleSheet(self.search_input.styleSheet())
+
+        # Кнопка выбора цвета с меню
+        self.color_menu = QMenu(self)
+        self._setup_color_menu()
+
+        self.color_button = QPushButton("Выбрать цвет")
+        self.color_button.setMenu(self.color_menu)
+        self.color_button.setStyleSheet("""
+            QPushButton {
+                background-color: #555555;
+                color: white;
+                border: 1px solid #777;
+                padding: 5px;
+            }
+            QPushButton::menu-indicator {
+                image: none;
+            }
+        """)
+        self.current_class_color = self._generate_random_color()
+
+        add_class_button = QPushButton("Добавить класс")
+        add_class_button.clicked.connect(self._add_class)
+        add_class_button.setStyleSheet(self.open_button.styleSheet())
+
+        edit_class_button = QPushButton("Изменить класс")
+        edit_class_button.clicked.connect(self._edit_class)
+        edit_class_button.setStyleSheet(self.open_button.styleSheet())
+
+        delete_class_button = QPushButton("Удалить класс")
+        delete_class_button.clicked.connect(self._delete_class)
+        delete_class_button.setStyleSheet(delete_button.styleSheet())
+
+        classes_control_layout.addWidget(self.class_name_input, stretch=3)
+        classes_control_layout.addWidget(self.color_button, stretch=1)
+        classes_control_layout.addWidget(add_class_button, stretch=1)
+        classes_control_layout.addWidget(edit_class_button, stretch=1)
+        classes_control_layout.addWidget(delete_class_button, stretch=1)
+
+        # Таблица классов
+        self.classes_table = QTableWidget()
+        self.classes_table.setColumnCount(3)
+        self.classes_table.setHorizontalHeaderLabels(["Название", "Цвет", "Дата создания"])
+        self.classes_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.classes_table.verticalHeader().setVisible(False)
+        self.classes_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.classes_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        self.classes_table.setStyleSheet(self.subprojects_table.styleSheet())
+
+        classes_layout.addLayout(classes_control_layout)
+        classes_layout.addWidget(QLabel("Список классов в выбранном подпроекте:"))
+        classes_layout.addWidget(self.classes_table)
+
+        # Добавляем вкладки
         self.bottom_panel.addTab(self.info_tab, "Информация")
         self.bottom_panel.addTab(self.subprojects_tab, "Подпроекты")
+        self.bottom_panel.addTab(self.classes_tab, "Классы объектов")
         self.bottom_panel.setStyleSheet("""
             QTabWidget::pane {
                 border: 1px solid #555;
@@ -227,6 +318,249 @@ class SubprojectsTab(QWidget):
                 background: #0066CC;
             }
         """)
+
+    def _setup_color_menu(self):
+        """Настраивает меню выбора цвета"""
+        colors = [
+            "#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF", "#00FFFF",
+            "#FFA500", "#A52A2A", "#800080", "#008000", "#808000", "#800000",
+            "#008080", "#000080", "#FF6347", "#FFD700", "#ADFF2F", "#DA70D6"
+        ]
+
+        # Добавляем стандартные цвета
+        for color in colors:
+            action = QAction(self)
+            action.setIcon(self._create_color_icon(color))
+            action.triggered.connect(lambda _, c=color: self._set_class_color(c))
+            self.color_menu.addAction(action)
+
+        # Добавляем разделитель
+        self.color_menu.addSeparator()
+
+        # Добавляем опцию выбора произвольного цвета
+        custom_action = QAction("Другой цвет...", self)
+        custom_action.triggered.connect(self._choose_custom_color)
+        self.color_menu.addAction(custom_action)
+
+    def _create_color_icon(self, color):
+        """Создает иконку с указанным цветом"""
+        pixmap = QPixmap(16, 16)
+        pixmap.fill(QColor(color))
+        return QIcon(pixmap)
+
+    def _set_class_color(self, color):
+        """Устанавливает выбранный цвет для класса"""
+        self.current_class_color = color
+        self.color_button.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {color};
+                color: {'black' if QColor(color).lightness() > 127 else 'white'};
+                border: 1px solid #777;
+                padding: 5px;
+            }}
+        """)
+
+    def _choose_custom_color(self):
+        """Открывает диалог выбора произвольного цвета"""
+        color = QColorDialog.getColor(QColor(self.current_class_color), self, "Выберите цвет класса")
+        if color.isValid():
+            self._set_class_color(color.name())
+
+    def _generate_random_color(self):
+        """Генерирует случайный цвет"""
+        return "#{:02x}{:02x}{:02x}".format(
+            random.randint(0, 255),
+            random.randint(0, 255),
+            random.randint(0, 255)
+        )
+
+    def _update_classes_ui(self):
+        """Обновляет UI классов при изменении выбранного подпроекта"""
+        if not self.current_project_data or not hasattr(self, 'classes_table'):
+            return
+
+        selected_row = self.subprojects_table.currentRow()
+        if selected_row >= 0 and "subprojects" in self.current_project_data:
+            subproject = self.current_project_data["subprojects"][selected_row]
+            self._update_classes_table(subproject.get("classes", []))
+
+            # Обновляем информацию о выбранном подпроекте
+            self.selected_subproject_label.setText(
+                f"Выбран подпроект: {subproject['name']} (классов: {len(subproject.get('classes', []))})"
+            )
+            self.selected_subproject_label.setStyleSheet("""
+                QLabel {
+                    color: #00FF00;
+                    font-weight: bold;
+                    font-size: 14px;
+                }
+            """)
+        else:
+            self.classes_table.setRowCount(0)
+            self.selected_subproject_label.setText("Не выбран подпроект")
+            self.selected_subproject_label.setStyleSheet("""
+                QLabel {
+                    color: #FFA500;
+                    font-weight: bold;
+                    font-size: 14px;
+                }
+            """)
+
+    # ... (остальные методы остаются без изменений)
+
+    def _add_class(self):
+        """Добавляет новый класс объектов"""
+        subproject, _ = self._get_selected_subproject()
+        if not subproject:
+            QMessageBox.warning(self, "Ошибка", "Выберите подпроект для добавления класса")
+            return
+
+        class_name = self.class_name_input.text().strip()
+        if not class_name:
+            QMessageBox.warning(self, "Ошибка", "Введите название класса")
+            return
+
+        if "classes" not in subproject:
+            subproject["classes"] = []
+
+        if any(c["name"] == class_name for c in subproject["classes"]):
+            QMessageBox.warning(self, "Ошибка", "Класс с таким именем уже существует")
+            return
+
+        # Генерируем случайный цвет, если не выбран
+        if not hasattr(self, 'current_class_color'):
+            self.current_class_color = self._generate_random_color()
+
+        new_class = {
+            "name": class_name,
+            "color": self.current_class_color,
+            "created": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+
+        subproject["classes"].append(new_class)
+        self._update_classes_table(subproject["classes"])
+        self._save_current_project_data()
+        self.class_name_input.clear()
+
+        # Генерируем новый случайный цвет для следующего класса
+        self.current_class_color = self._generate_random_color()
+        self._set_class_color(self.current_class_color)
+
+        self.logger.info(f"Добавлен класс '{class_name}' в подпроект '{subproject['name']}'")
+        self.subprojects_updated.emit()
+
+    def _choose_class_color(self):
+        """Выбор цвета для класса"""
+        color = QColorDialog.getColor()
+        if color.isValid():
+            self.current_class_color = color.name()
+            self.class_color_button.setStyleSheet(f"""
+                QPushButton {{
+                    background-color: {self.current_class_color};
+                    color: {'black' if color.lightness() > 127 else 'white'};
+                    border: 1px solid #777;
+                    padding: 5px;
+                }}
+            """)
+
+    def _update_classes_table(self, classes):
+        """Обновляет таблицу классов"""
+        self.classes_table.setRowCount(len(classes))
+
+        for row, class_data in enumerate(classes):
+            # Название класса
+            name_item = QTableWidgetItem(class_data.get("name", ""))
+            name_item.setFlags(name_item.flags() & ~Qt.ItemFlag.ItemIsEditable)
+
+            # Цвет класса
+            color = class_data.get("color", "#FFFFFF")
+            color_item = QTableWidgetItem()
+            color_item.setBackground(QColor(color))
+            color_item.setFlags(color_item.flags() & ~Qt.ItemFlag.ItemIsEditable)
+
+            # Дата создания
+            date_item = QTableWidgetItem(class_data.get("created", ""))
+            date_item.setFlags(date_item.flags() & ~Qt.ItemFlag.ItemIsEditable)
+
+            self.classes_table.setItem(row, 0, name_item)
+            self.classes_table.setItem(row, 1, color_item)
+            self.classes_table.setItem(row, 2, date_item)
+
+    def _get_selected_subproject(self):
+        """Возвращает выбранный подпроект и его индекс"""
+        if not self.current_project_data or "subprojects" not in self.current_project_data:
+            return None, -1
+
+        selected_row = self.subprojects_table.currentRow()
+        if 0 <= selected_row < len(self.current_project_data["subprojects"]):
+            return self.current_project_data["subprojects"][selected_row], selected_row
+        return None, -1
+
+    def _edit_class(self):
+        """Редактирует выбранный класс"""
+        subproject, _ = self._get_selected_subproject()
+        if not subproject or "classes" not in subproject:
+            QMessageBox.warning(self, "Ошибка", "Выберите подпроект и класс для редактирования")
+            return
+
+        selected_row = self.classes_table.currentRow()
+        if selected_row == -1:
+            QMessageBox.warning(self, "Ошибка", "Выберите класс для редактирования")
+            return
+
+        old_class = subproject["classes"][selected_row]
+        old_name = old_class["name"]
+
+        new_name, ok = QInputDialog.getText(
+            self,
+            "Редактирование класса",
+            "Введите новое название класса:",
+            QLineEdit.EchoMode.Normal,
+            old_name
+        )
+
+        if ok and new_name.strip():
+            if new_name.strip() != old_name:
+                if any(c["name"] == new_name.strip() for c in subproject["classes"]):
+                    QMessageBox.warning(self, "Ошибка", "Класс с таким именем уже существует")
+                    return
+
+                # Обновляем данные класса
+                subproject["classes"][selected_row]["name"] = new_name.strip()
+                subproject["classes"][selected_row]["color"] = self.current_class_color
+
+                self._update_classes_table(subproject["classes"])
+                self._save_current_project_data()
+                self.logger.info(f"Класс '{old_name}' изменён на '{new_name.strip()}'")
+                self.subprojects_updated.emit()
+
+    def _delete_class(self):
+        """Удаляет выбранный класс"""
+        subproject, _ = self._get_selected_subproject()
+        if not subproject or "classes" not in subproject:
+            QMessageBox.warning(self, "Ошибка", "Выберите подпроект и класс для удаления")
+            return
+
+        selected_row = self.classes_table.currentRow()
+        if selected_row == -1:
+            QMessageBox.warning(self, "Ошибка", "Выберите класс для удаления")
+            return
+
+        class_name = subproject["classes"][selected_row]["name"]
+
+        reply = QMessageBox.question(
+            self,
+            "Подтверждение удаления",
+            f"Вы действительно хотите удалить класс '{class_name}'?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+
+        if reply == QMessageBox.StandardButton.Yes:
+            del subproject["classes"][selected_row]
+            self._update_classes_table(subproject["classes"])
+            self._save_current_project_data()
+            self.logger.info(f"Удалён класс '{class_name}'")
+            self.subprojects_updated.emit()
 
     def _load_projects(self) -> None:
         """Загружает список проектов из файла"""
