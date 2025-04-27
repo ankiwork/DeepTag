@@ -893,14 +893,38 @@ class AnnotationTab(QWidget):
         painter = QPainter(self.image_label)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
+        # Рисуем текущую аннотацию в процессе создания (прямоугольник)
+        if self.selected_class and self.current_tool == "rect" and self.start_point and self.end_point:
+            # Настройки пера для текущего прямоугольника
+            pen = QPen(QColor(self.selected_class["color"]), 2)
+            pen.setStyle(Qt.PenStyle.SolidLine)
+            painter.setPen(pen)
+            painter.setBrush(Qt.BrushStyle.NoBrush)  # Прозрачная заливка
+
+            # Преобразуем координаты для отображения
+            start_x = int(self.start_point.x() * self._current_scale + self._offset.x())
+            start_y = int(self.start_point.y() * self._current_scale + self._offset.y())
+            end_x = int(self.end_point.x() * self._current_scale + self._offset.x())
+            end_y = int(self.end_point.y() * self._current_scale + self._offset.y())
+
+            # Рисуем прямоугольник
+            rect = QRect(QPoint(start_x, start_y), QPoint(end_x, end_y)).normalized()
+            painter.drawRect(rect)
+
+            # Рисуем текст с именем класса
+            painter.setPen(QPen(QColor("white"), 1))
+            painter.drawText(rect.topLeft() + QPoint(5, 15), self.selected_class["name"])
+
         # Рисуем существующие аннотации для текущего изображения
         for i, ann in enumerate(self.annotations):
             if ann["image"] != self.image_files[self.current_image_index]:
                 continue
 
-            # Выделяем выбранную аннотацию более толстой линией
-            pen_width = 3 if i == self.selected_annotation_index else 2
-            painter.setPen(QPen(QColor(ann["color"]), pen_width))
+            # Настройки пера для существующих аннотаций
+            pen = QPen(QColor(ann["color"]), 3 if i == self.selected_annotation_index else 2)
+            pen.setStyle(Qt.PenStyle.SolidLine)
+            painter.setPen(pen)
+            painter.setBrush(Qt.BrushStyle.NoBrush)  # Прозрачная заливка
 
             if ann["type"] == "rect":
                 x, y, w, h = ann["coordinates"]
@@ -955,23 +979,5 @@ class AnnotationTab(QWidget):
                 # Рисуем текст с именем класса
                 painter.setPen(QPen(QColor("white"), 1))
                 painter.drawText(center + QPoint(8, 5), ann["class"])
-
-        # Рисуем текущую аннотацию в процессе создания (прямоугольник)
-        if self.selected_class and self.current_tool == "rect" and self.start_point and self.end_point:
-            painter.setPen(QPen(QColor(self.selected_class["color"]), 2))
-
-            # Преобразуем координаты для отображения
-            start_x = int(self.start_point.x() * self._current_scale + self._offset.x())
-            start_y = int(self.start_point.y() * self._current_scale + self._offset.y())
-            end_x = int(self.end_point.x() * self._current_scale + self._offset.x())
-            end_y = int(self.end_point.y() * self._current_scale + self._offset.y())
-
-            # Рисуем прямоугольник
-            rect = QRect(QPoint(start_x, start_y), QPoint(end_x, end_y)).normalized()
-            painter.drawRect(rect)
-
-            # Рисуем текст с именем класса
-            painter.setPen(QPen(QColor("white"), 1))
-            painter.drawText(rect.topLeft() + QPoint(5, 15), self.selected_class["name"])
 
         painter.end()
