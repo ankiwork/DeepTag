@@ -1,0 +1,128 @@
+/* Main application styling */
+QWidget {
+    background: #f5f5f5;
+    font-family: 'Arial';
+    color: #333333;
+}
+
+/* Navigation bar */
+#navBar {
+    background: #2c3e50;
+    border-bottom: 2px solid #34495e;
+    padding: 6px 0;
+}
+
+/* Navigation buttons - improved visibility */
+#navButton {
+    padding: 10px 20px;
+    margin: 0 3px;
+    font-size: 14px;
+    color: #ecf0f1;
+    border: 1px solid #3a516e;
+    border-radius: 4px;
+    background: #34495e;
+    min-width: 90px;
+}
+
+#navButton:hover {
+    background: #3d566e;
+    border-color: #4a627d;
+}
+
+#navButton:checked {
+    background: #3498db;
+    border-color: #2c81ba;
+    color: white;
+    /* font-weight remains normal as requested */
+}
+
+/* Page titles */
+#pageTitle {
+    font-size: 24px;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 15px;
+}
+
+/* Home page specific */
+#homeTitle {
+    font-size: 32px;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+#homeSubtitle {
+    font-size: 16px;
+    color: #7f8c8d;
+}
+
+#quickStartButton {
+    padding: 10px 25px;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+#quickStartButton:hover {
+    background: #2980b9;
+}
+
+/* Projects page */
+#projectList {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 14px;
+}
+
+#projectList::item {
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+}
+
+#projectList::item:selected {
+    background: #3498db;
+    color: white;
+}
+
+/* Action buttons */
+#actionButton {
+    padding: 8px 16px;
+    background: #27ae60;
+    color: white;
+    border: none;
+    border-radius: 4px;
+}
+
+#actionButton:hover {
+    background: #219653;
+}
+
+/* Markup editor */
+#markupEditor {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    font-family: 'Courier New', monospace;
+}
+
+/* Statistics table */
+#statsTable {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    alternate-background-color: #f9f9f9;
+}
+
+#statsTable::item {
+    padding: 8px;
+}
+
+#statsTable::item:selected {
+    background: #3498db;
+    color: white;
+}

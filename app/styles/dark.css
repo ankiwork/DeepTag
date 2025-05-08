@@ -1,0 +1,132 @@
+/* Main application styling */
+QWidget {
+    background: #121212;
+    font-family: 'Arial';
+    color: #e0e0e0;
+}
+
+/* Navigation bar */
+#navBar {
+    background: #1f2937;
+    border-bottom: 2px solid #374151;
+    padding: 6px 0;
+}
+
+/* Navigation buttons - dark style without blue */
+#navButton {
+    padding: 10px 20px;
+    margin: 0 3px;
+    font-size: 14px;
+    color: #d1d5db;
+    border: 1px solid #4b5563;
+    border-radius: 4px;
+    background: #2d3748; /* тёмно-серый с синим оттенком */
+    min-width: 90px;
+}
+
+#navButton:hover {
+    background: #4a5568; /* светлее фон при наведении */
+    border-color: #718096;
+}
+
+#navButton:checked {
+    background: #22543d; /* тёмно-зелёный */
+    border-color: #276749;
+    color: #a7f3d0; /* светло-зелёный */
+    /* font-weight remains normal */
+}
+
+/* Page titles */
+#pageTitle {
+    font-size: 24px;
+    font-weight: bold;
+    color: #e0e0e0;
+    margin-bottom: 15px;
+}
+
+/* Home page specific */
+#homeTitle {
+    font-size: 32px;
+    font-weight: bold;
+    color: #e0e0e0;
+}
+
+#homeSubtitle {
+    font-size: 16px;
+    color: #9ca3af;
+}
+
+/* Quick Start Button - dark green style */
+#quickStartButton {
+    padding: 10px 25px;
+    background: #276749;
+    color: #a7f3d0;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+#quickStartButton:hover {
+    background: #2f855a;
+}
+
+/* Projects page */
+#projectList {
+    background: #1f2937;
+    border: 1px solid #374151;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 14px;
+    color: #d1d5db;
+}
+
+#projectList::item {
+    padding: 8px;
+    border-bottom: 1px solid #374151;
+}
+
+#projectList::item:selected {
+    background: #22543d;
+    color: #a7f3d0;
+}
+
+/* Action buttons - dark green style */
+#actionButton {
+    padding: 8px 16px;
+    background: #276749;
+    color: #a7f3d0;
+    border: none;
+    border-radius: 4px;
+}
+
+#actionButton:hover {
+    background: #2f855a;
+}
+
+/* Markup editor */
+#markupEditor {
+    background: #1f2937;
+    border: 1px solid #374151;
+    border-radius: 5px;
+    padding: 10px;
+    font-family: 'Courier New', monospace;
+    color: #d1d5db;
+}
+
+/* Statistics table */
+#statsTable {
+    background: #1f2937;
+    border: 1px solid #374151;
+    border-radius: 5px;
+    alternate-background-color: #111827;
+    color: #d1d5db;
+}
+
+#statsTable::item {
+    padding: 8px;
+}
+
+#statsTable::item:selected {
+    background: #22543d;
+    color: #a7f3d0;
+}
