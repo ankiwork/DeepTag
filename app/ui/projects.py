@@ -1,12 +1,9 @@
 import os
-import json
 import re
+import json
+from PySide6.QtCore import *
 from datetime import datetime
-from PySide6.QtCore import Qt, QSize
-from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QFrame, QLabel,
-                               QPushButton, QSpacerItem, QSizePolicy, QScrollArea,
-                               QDialog, QLineEdit, QMessageBox, QListWidget,
-                               QListWidgetItem, QAbstractItemView)
+from PySide6.QtWidgets import *
 
 
 class ConfirmationDialog(QDialog):
@@ -587,7 +584,7 @@ class ProjectsPage(QWidget):
         }
 
         with open(os.path.join(project_path, "meta.json"), "w", encoding='utf-8') as f:
-            json.dump(meta, f, indent=2)
+            json.dump(meta, f, indent=2)  # type: ignore
 
     def _rename_project(self, old_name, new_name):
         old_path = os.path.join("data", old_name)
@@ -603,7 +600,7 @@ class ProjectsPage(QWidget):
                 meta["name"] = new_name
                 meta["modified"] = datetime.now().isoformat()
                 with open(meta_path, "w", encoding='utf-8') as f:
-                    json.dump(meta, f, indent=2)
+                    json.dump(meta, f, indent=2)  # type: ignore
 
     def _remove_project(self, name):
         project_path = os.path.join("data", name)
@@ -638,7 +635,7 @@ class ProjectsPage(QWidget):
             meta["modified"] = datetime.now().isoformat()
 
             with open(meta_path, "w", encoding='utf-8') as f:
-                json.dump(meta, f, indent=2)
+                json.dump(meta, f, indent=2)  # type: ignore
 
         sub_meta = {
             "name": subproject_name,
@@ -650,7 +647,7 @@ class ProjectsPage(QWidget):
         }
 
         with open(os.path.join(subproject_path, "meta.json"), "w", encoding='utf-8') as f:
-            json.dump(sub_meta, f, indent=2)
+            json.dump(sub_meta, f, indent=2)  # type: ignore
 
     def _rename_subproject(self, project_name, old_name, new_name):
         project_path = os.path.join("data", project_name)
@@ -673,7 +670,7 @@ class ProjectsPage(QWidget):
                     meta["modified"] = datetime.now().isoformat()
 
                     with open(meta_path, "w", encoding='utf-8') as f:
-                        json.dump(meta, f, indent=2)
+                        json.dump(meta, f, indent=2)  # type: ignore
 
             sub_meta_path = os.path.join(new_path, "meta.json")
             if os.path.exists(sub_meta_path):
@@ -684,7 +681,7 @@ class ProjectsPage(QWidget):
                 sub_meta["modified"] = datetime.now().isoformat()
 
                 with open(sub_meta_path, "w", encoding='utf-8') as f:
-                    json.dump(sub_meta, f, indent=2)
+                    json.dump(sub_meta, f, indent=2)  # type: ignore
 
     def _remove_subproject(self, project_name, subproject_name):
         project_path = os.path.join("data", project_name)
@@ -704,7 +701,7 @@ class ProjectsPage(QWidget):
                     meta["modified"] = datetime.now().isoformat()
 
                     with open(meta_path, "w", encoding='utf-8') as f:
-                        json.dump(meta, f, indent=2)
+                        json.dump(meta, f, indent=2)  # type: ignore
 
     def _save_class(self, project_name, subproject_name, class_name):
         subproject_path = os.path.join("data", project_name, "subprojects", subproject_name)
@@ -728,7 +725,7 @@ class ProjectsPage(QWidget):
             meta["modified"] = datetime.now().isoformat()
 
             with open(meta_path, "w", encoding='utf-8') as f:
-                json.dump(meta, f, indent=2)
+                json.dump(meta, f, indent=2)  # type: ignore
 
     def _rename_class(self, project_name, subproject_name, old_name, new_name):
         subproject_path = os.path.join("data", project_name, "subprojects", subproject_name)
@@ -744,7 +741,7 @@ class ProjectsPage(QWidget):
                 meta["modified"] = datetime.now().isoformat()
 
                 with open(meta_path, "w", encoding='utf-8') as f:
-                    json.dump(meta, f, indent=2)
+                    json.dump(meta, f, indent=2)  # type: ignore
 
     def _remove_class(self, project_name, subproject_name, class_name):
         subproject_path = os.path.join("data", project_name, "subprojects", subproject_name)
@@ -759,7 +756,7 @@ class ProjectsPage(QWidget):
                 meta["modified"] = datetime.now().isoformat()
 
                 with open(meta_path, "w", encoding='utf-8') as f:
-                    json.dump(meta, f, indent=2)
+                    json.dump(meta, f, indent=2)  # type: ignore
 
     def load_projects(self):
         self.projects_list.clear()

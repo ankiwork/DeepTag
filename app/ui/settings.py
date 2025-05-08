@@ -1,4 +1,5 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout
+from PySide6.QtWidgets import *
+
 
 class SettingsPage(QWidget):
     def __init__(self):

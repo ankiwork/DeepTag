@@ -13,7 +13,6 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("Application")
 
-        # Initialize UI components
         self.stacked_widget = QStackedWidget()
         self.pages = {}
         self.nav_buttons = {}
@@ -21,19 +20,15 @@ class MainWindow(QMainWindow):
         self.setup_ui()
 
     def setup_ui(self):
-        # Main widget setup
         main_widget = QWidget()
         main_layout = QVBoxLayout()
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
 
-        # Navigation bar
         nav_bar = self.create_navigation_bar()
 
-        # Pages setup
         self.setup_pages()
 
-        # Add widgets to main layout
         main_layout.addWidget(nav_bar)
         main_layout.addWidget(self.stacked_widget)
 
@@ -41,16 +36,13 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(main_widget)
 
     def create_navigation_bar(self):
-        # Create the navigation bar container
         nav_bar = QFrame()
         nav_bar.setObjectName("navBar")
 
-        # Main layout with slight margins
         nav_layout = QHBoxLayout()
-        nav_layout.setContentsMargins(10, 5, 10, 5)  # Компактные отступы
-        nav_layout.setSpacing(5)  # Небольшой промежуток между кнопками
+        nav_layout.setContentsMargins(10, 5, 10, 5)
+        nav_layout.setSpacing(5)
 
-        # Clean white theme CSS styling
         nav_bar.setStyleSheet("""
             /* Main navigation bar - чистый белый фон */
             QFrame#navBar {
@@ -84,7 +76,6 @@ class MainWindow(QMainWindow):
             }
         """)
 
-        # Navigation buttons configuration
         buttons = [
             ("home", "🏠 Home"),
             ("projects", "📂 Projects"),
@@ -93,7 +84,6 @@ class MainWindow(QMainWindow):
             ("settings", "⚙ Settings")
         ]
 
-        # Create and configure buttons
         for page_id, text in buttons:
             btn = QPushButton(text)
             btn.setCheckable(True)
@@ -104,7 +94,6 @@ class MainWindow(QMainWindow):
             self.nav_buttons[page_id] = btn
             nav_layout.addWidget(btn)
 
-        # Добавляем растягивающийся элемент перед settings
         if "settings" in self.nav_buttons:
             nav_layout.insertStretch(nav_layout.count() - 1, 1)
 
@@ -123,7 +112,6 @@ class MainWindow(QMainWindow):
         for page in self.pages.values():
             self.stacked_widget.addWidget(page)
 
-        # Set home page as default
         self.switch_page("home")
 
     def switch_page(self, page_id):
