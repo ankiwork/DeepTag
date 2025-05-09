@@ -13,7 +13,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         log("INIT", "Initializing MainWindow")
-        self.setWindowTitle("Application")
+        self.setWindowTitle("DeepTag")
 
         self.stacked_widget = QStackedWidget()
         self.pages = {}
